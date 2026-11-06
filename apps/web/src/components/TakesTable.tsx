@@ -82,7 +82,7 @@ function LocalText<T>({ value, toText, fromText, onValueChange, render }: LocalT
   const [text, setText] = useState(toText(value));
   const [previousValue, setPreviousValue] = useState(value);
 
-  if (!Object.is(previousValue, value) && JSON.stringify(previousValue) !== JSON.stringify(value)) {
+  if (JSON.stringify(previousValue) !== JSON.stringify(value)) {
     setPreviousValue(value);
     if (JSON.stringify(fromText(text)) !== JSON.stringify(value)) setText(toText(value));
   }
@@ -114,6 +114,7 @@ export function TakesTable({
             ?.message;
         const errorId = (field: string) => `take-${take.number}-${field}-error`;
 
+        // key por índice é seguro: LocalText recopia o texto quando o valor muda por fora.
         return (
           <fieldset key={index} aria-label={`Take ${take.number}`} disabled={isSaving}>
             <legend>Take {take.number}</legend>

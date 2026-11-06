@@ -28,13 +28,13 @@ export function App() {
             onRemove={editor.removeTake}
             onSave={editor.saveTakes}
           />
-          {editor.error !== null && (
-            <p role="alert" className="alert">
-              {editor.error}
-            </p>
-          )}
           {editor.savedMessage !== null && <p role="status">{editor.savedMessage}</p>}
         </>
+      )}
+      {editor.error !== null && (
+        <p role="alert" className="alert">
+          {editor.error}
+        </p>
       )}
     </main>
   );

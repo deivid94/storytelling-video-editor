@@ -61,6 +61,16 @@ describe('App', () => {
     expect(screen.queryByLabelText('Roteiro')).toBeNull();
   });
 
+  it('sem projeto mostra o erro e mantém o formulário', () => {
+    vi.mocked(useProjectEditor).mockReturnValue(
+      makeEditor({ error: 'Sem conexão com o servidor.' }),
+    );
+    render(<App />);
+
+    expect(screen.getByRole('alert').textContent).toBe('Sem conexão com o servidor.');
+    expect(screen.getByLabelText('Roteiro')).toBeDefined();
+  });
+
   it('mostra erro de rede e mensagem de salvo', () => {
     vi.mocked(useProjectEditor).mockReturnValue(
       makeEditor({ project, error: 'Falha de rede.', savedMessage: 'Takes salvos.' }),
