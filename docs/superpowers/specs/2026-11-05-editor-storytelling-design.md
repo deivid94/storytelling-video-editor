@@ -105,7 +105,7 @@ O app manda o texto para o Claude e recebe uma lista estruturada. Cada take tem:
   - Áudio AAC, descartado.
   - O arquivo traz metadados do Blackmagic Camera, entre eles a **lente** (`com.blackmagic-design.camera.lensType`, ex.: "iPhone 14 Pro Max 24mm"). O app mostra um aviso quando a lente do clipe não bate com a do roteiro.
   - O arquivo traz também a **localização GPS** da gravação.
-- **Resolução:** o usuário achava que gravava em 4K, mas o clipe de teste é 720p. Pode ser a configuração do app ou uma cópia leve (proxy) da Blackmagic Cloud. O MVP usa o arquivo que estiver na pasta e **avisa quando o clipe tem menos de 1080 pixels no lado menor** ("resolução baixa, pode ser proxy"). A exportação é permitida, com esse aviso.
+- **Proxy x original:** o Blackmagic Camera grava o **original em 4K 60fps** no celular, mas a Blackmagic Cloud sincroniza **só o proxy em 720p** para o PC. Os originais 4K não chegam sozinhos; o usuário pode mandá-los do celular manualmente (ex.: Google Drive). Por isso a pasta de clipes normalmente tem só proxies, e o app avisa quando a exportação vai sair de um clipe com menos de 1080 pixels no lado menor. Uso dos originais: seção 12.
 
 ## 7. Como o app monta o vídeo
 
@@ -188,11 +188,18 @@ Como o navegador pode não tocar o codec original, o backend gera **prévias lev
 - **Fora da faixa de duração** é permitido, com aviso, quando necessário para não cortar uma execução.
 - **Instruções que o MVP não executa** (câmera lenta) viram notas no resumo exportado.
 - **Saída em 1080×1920 60fps** e aviso de proxy abaixo de 1080 pixels.
+- **Proxy na análise, original 4K na exportação**, pareados pelo `clipID` do metadado, como fatia 7 (depois do núcleo).
 - **Persistência em arquivos JSON** numa pasta `data/` fora do git, um diretório por projeto (roteiro interpretado, escolhas, cache da análise, prévias). O repository isola isso.
 
-## 12. Futuro: proxy e original
+## 12. Proxy para analisar, original 4K para exportar
 
-Usar o proxy 720p na análise (mais rápido e barato) e o original 4K na exportação, pareando os dois arquivos. Fica fora do MVP porque ainda não se sabe como a Blackmagic Cloud nomeia e organiza os proxies na pasta.
+- **Análise e prévias sempre no proxy** (720p): mais rápido e mais barato.
+- **Exportação no original 4K quando ele existir.** O usuário pode informar, opcionalmente, uma segunda pasta com os originais (ex.: baixados do Drive).
+- **Pareamento pelo metadado `com.apple.proapps.clipID`** (ex.: `A001_11051828_C019`), e não pelo nome do arquivo: o usuário renomeia os proxies para `take1`, `take2`..., mas o ID do clipe dentro do arquivo continua o mesmo. Isso precisa ser confirmado com um original 4K real na hora de construir.
+- O corte é aplicado no original com os mesmos tempos do proxy. Se as durações dos dois diferirem em mais de 1 quadro, o app avisa e usa o proxy para aquele take.
+- Sem original, exporta do proxy com o aviso de resolução baixa.
+
+Essa parte vem **depois do núcleo do MVP** (fatia 7): o MVP já entrega valor exportando do proxy.
 
 Os vídeos de exemplo em `fixtures/videos/` devem imitar o formato real: curtos (1 a 3s), H.265, 60fps, verticais com marcação de rotação, em baixa resolução para não pesar no repositório.
 
@@ -213,7 +220,10 @@ Os vídeos de exemplo em `fixtures/videos/` devem imitar o formato real: curtos 
 - nome fora do padrão, `take0`, `take-1`, `take3c` sem `take3a`;
 - take do roteiro sem clipe; clipe sem take no roteiro;
 - arquivo que não é vídeo ou está corrompido;
-- clipe mais curto que a duração mínima pedida.
+- clipe mais curto que a duração mínima pedida;
+- original sem proxy correspondente, proxy sem original, dois arquivos com o mesmo `clipID`;
+- original e proxy com durações diferentes;
+- clipe sem o metadado `clipID`.
 
 **Montagem**
 
@@ -231,6 +241,7 @@ Os vídeos de exemplo em `fixtures/videos/` devem imitar o formato real: curtos 
 4. **Detecção de execução** (movimento): cortes que nunca interrompem uma repetição.
 5. **Escolha por visão** (com estimativa de custo, teto e cache).
 6. **Tela de revisão completa** com prévias.
+7. **Originais 4K:** pasta opcional de originais, pareamento por `clipID` e exportação em 4K reduzido para 1080×1920.
 
 ## 15. Fica a cargo de quem construir
 
