@@ -1,0 +1,14 @@
+node_modules/
+dist/
+coverage/
+playwright-report/
+test-results/
+.env
+*.log
+
+# Vídeos e projetos do usuário (nunca vão para o repositório)
+/src/
+/data/
+*.mov
+*.mp4
+!fixtures/videos/*.mp4

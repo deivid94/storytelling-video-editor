@@ -1,0 +1,7 @@
+packages:
+  - 'apps/*'
+
+# Pacotes que podem rodar scripts de instalação (o pnpm bloqueia por padrão).
+onlyBuiltDependencies:
+  - esbuild
+  - simple-git-hooks
