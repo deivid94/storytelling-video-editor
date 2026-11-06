@@ -1,17 +1,21 @@
 import request from 'supertest';
 import { describe, expect, it } from 'vitest';
 import { createApp } from '../src/app.js';
+import type { ProjectService } from '../src/services/project.service.js';
+
+// As rotas de health não usam o service, então um objeto vazio basta.
+const app = createApp({ projectService: {} as ProjectService });
 
 describe('GET /api/health', () => {
   it('responde 200 com status ok', async () => {
-    const response = await request(createApp()).get('/api/health');
+    const response = await request(app).get('/api/health');
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ status: 'ok' });
   });
 
   it('responde 404 para uma rota que não existe', async () => {
-    const response = await request(createApp()).get('/api/nao-existe');
+    const response = await request(app).get('/api/nao-existe');
 
     expect(response.status).toBe(404);
   });
