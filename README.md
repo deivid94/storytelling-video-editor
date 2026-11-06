@@ -28,8 +28,8 @@ docs/    documentação, specs e planos
 
 ## Requisitos
 
-- Node.js 24+
-- pnpm 10+
+- Node.js 26+
+- pnpm 12+
 - ffmpeg no PATH
 
 ## Como rodar

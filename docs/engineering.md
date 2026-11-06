@@ -54,7 +54,13 @@ Motivo: os componentes ficam simples, e o que tem lógica (hooks e lib) é test�
 
 ## Dependências e configuração
 
-- Gerenciador: **pnpm** (monorepo com workspaces). Não usar npm nem yarn.
+- Gerenciador: **pnpm 12** (monorepo com workspaces), Node.js 26. Não usar npm nem yarn.
+- Segurança da cadeia de dependências (`pnpm-workspace.yaml`):
+  - `minimumReleaseAge: 10080`: só instala versões publicadas há 7+ dias.
+  - `blockExoticSubdeps`: dependências indiretas só do registry.
+  - `trustPolicy: no-downgrade`: bloqueia versões com garantia de origem pior que as anteriores.
+  - Exceções em `minimumReleaseAgeExclude` só com **versão exata**, motivo e data para remover.
+- Actions do GitHub sempre fixadas por SHA do commit, com a versão em comentário.
 - Configs e APIs de bibliotecas sempre conferidas na documentação atual (Context7), nunca de memória.
 - TypeScript fixado em 6.0 porque o typescript-eslint ainda não suporta o 7.
 
