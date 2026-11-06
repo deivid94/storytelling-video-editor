@@ -17,7 +17,9 @@ export default defineConfig({
       name: 'api',
       command: 'pnpm --filter api dev',
       url: 'http://localhost:3333/api/health',
-      reuseExistingServer: !isCI,
+      // Nunca reaproveita um servidor de dev, que usaria o Claude de verdade.
+      reuseExistingServer: false,
+      env: { SCRIPT_INTERPRETER: 'fake', DATA_DIR: '../../test-results/e2e-data' },
       timeout: 120_000,
     },
     {
