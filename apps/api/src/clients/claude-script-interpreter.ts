@@ -31,7 +31,7 @@ export function createClaudeScriptInterpreter(options: {
           messages: [{ role: 'user', content: scriptText }],
         });
       } catch (error) {
-        if (error instanceof Anthropic.APIError) {
+        if (error instanceof Anthropic.AnthropicError) {
           throw new ScriptInterpretationError('A chamada ao Claude falhou', { cause: error });
         }
         throw error;

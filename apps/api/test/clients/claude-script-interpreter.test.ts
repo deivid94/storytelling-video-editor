@@ -69,6 +69,12 @@ describe('createClaudeScriptInterpreter', () => {
     await expect(interpreter.interpret('x')).rejects.toBeInstanceOf(ScriptInterpretationError);
   });
 
+  it('lança ScriptInterpretationError quando o SDK não consegue ler a resposta', async () => {
+    parse.mockRejectedValue(new Anthropic.AnthropicError('Failed to parse structured output'));
+
+    await expect(interpreter.interpret('x')).rejects.toBeInstanceOf(ScriptInterpretationError);
+  });
+
   it('deixa subir erros que não são da API', async () => {
     parse.mockRejectedValue(new TypeError('bug'));
 
