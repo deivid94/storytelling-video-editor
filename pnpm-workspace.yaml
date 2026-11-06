@@ -2,6 +2,20 @@ packages:
   - 'apps/*'
 
 # Pacotes que podem rodar scripts de instalação (o pnpm bloqueia por padrão).
-onlyBuiltDependencies:
-  - esbuild
-  - simple-git-hooks
+allowBuilds:
+  esbuild: true
+  simple-git-hooks: true
+
+# Segurança da cadeia de dependências.
+# Só instala versões publicadas há pelo menos 7 dias (em minutos).
+minimumReleaseAge: 10080
+# Dependências transitivas não podem vir de fontes fora do registry (git, URLs).
+blockExoticSubdeps: true
+# Bloqueia atualizações que rebaixam o nível de confiança da publicação.
+trustPolicy: no-downgrade
+
+# Exceções pontuais à regra dos 7 dias (sempre versão exata, com o motivo).
+minimumReleaseAgeExclude:
+  # Dependência indireta do Babel. A 6.3.1 é bloqueada pela trustPolicy (origem menos garantida),
+  # então a única opção é a 6.3.2 (publicada em 02/11/2026). Remover depois de 09/11/2026.
+  - semver@6.3.2
