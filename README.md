@@ -53,12 +53,14 @@ Os projetos ficam salvos em `data/` (ignorada pelo git). A API está documentada
 
 ### Variáveis do `.env`
 
-| Variável              | O que faz                                                             |
-| --------------------- | --------------------------------------------------------------------- |
-| `ANTHROPIC_API_KEY`   | chave da API do Claude                                                |
-| `SCRIPT_INTERPRETER`  | `claude` (real) ou `fake` (sem chamar a API, usado nos testes e2e)    |
-| `CLAUDE_SCRIPT_MODEL` | modelo usado para interpretar o roteiro                               |
-| `DATA_DIR`            | pasta dos projetos (vazio = `data/` na raiz); relativa à pasta da API |
+| Variável              | O que faz                                                                 |
+| --------------------- | ------------------------------------------------------------------------- |
+| `ANTHROPIC_API_KEY`   | chave da API do Claude (obrigatória com `claude`; a API não sobe sem ela) |
+| `SCRIPT_INTERPRETER`  | `claude` (real) ou `fake` (sem chamar a API, usado nos testes e2e)        |
+| `CLAUDE_SCRIPT_MODEL` | modelo usado para interpretar o roteiro                                   |
+| `DATA_DIR`            | pasta dos projetos (vazio = `data/` na raiz); relativa à pasta da API     |
+
+A API usa a porta 3333 (o proxy do Vite e o Playwright esperam essa porta).
 
 ## Scripts
 

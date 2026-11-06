@@ -7,6 +7,7 @@ export interface AppConfig {
   claudeScriptModel: string;
 }
 
+// O proxy do Vite (apps/web) e o Playwright esperam a API na porta 3333; mudar API_PORT exige ajustá-los.
 const DEFAULT_PORT = 3333;
 const DEFAULT_MODEL = 'claude-opus-5-5';
 // Funciona em src/ e em dist/: os dois ficam três pastas abaixo da raiz do repo.
@@ -30,10 +31,17 @@ function parseScriptInterpreter(value: string | undefined): AppConfig['scriptInt
 }
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
+  const scriptInterpreter = parseScriptInterpreter(env.SCRIPT_INTERPRETER);
+  // Falha cedo: sem chave, o SDK só reclamaria na primeira requisição, com um erro genérico.
+  if (scriptInterpreter === 'claude' && !env.ANTHROPIC_API_KEY?.trim()) {
+    throw new Error(
+      'ANTHROPIC_API_KEY não definida. Preencha o .env ou use SCRIPT_INTERPRETER=fake.',
+    );
+  }
   return {
     port: parsePort(env.API_PORT),
     dataDir: env.DATA_DIR ? path.resolve(env.DATA_DIR) : DEFAULT_DATA_DIR,
-    scriptInterpreter: parseScriptInterpreter(env.SCRIPT_INTERPRETER),
+    scriptInterpreter,
     claudeScriptModel: env.CLAUDE_SCRIPT_MODEL || DEFAULT_MODEL,
   };
 }
