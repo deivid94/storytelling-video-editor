@@ -1,0 +1,35 @@
+export type Framing = 'close' | 'medium' | 'wide';
+
+export interface ScriptTake {
+  number: number; // ordem no roteiro, começa em 1
+  name: string;
+  minSeconds: number;
+  maxSeconds: number;
+  action: string;
+  framing: Framing | null;
+  lens: string | null;
+  distance: string | null;
+  angle: string | null;
+  hasExecution: boolean;
+  notes: string[]; // instruções que o MVP não executa, ex.: "desacelere 30-50%"
+}
+
+export type InterpretedTake = Omit<ScriptTake, 'number'>;
+
+export interface TakeError {
+  takeNumber: number;
+  field: keyof ScriptTake;
+  message: string;
+}
+
+export interface Project {
+  id: string;
+  createdAt: string; // ISO 8601
+  scriptText: string;
+  takes: ScriptTake[];
+  interpretationError: string | null;
+}
+
+export interface ProjectView extends Project {
+  takeErrors: TakeError[];
+}
