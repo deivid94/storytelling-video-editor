@@ -4,7 +4,7 @@ App pessoal que monta vídeos curtos de treino a partir de um roteiro.
 
 Você entrega o **roteiro** (gerado pelo Claude, com etapas, tempo, ângulo e lente de cada take), os **clipes brutos** (gravados no app Blackmagic Camera e nomeados `take1`, `take2`, `take3a`...) e, opcionalmente, a **música**. O app encontra o melhor trecho de cada clipe, corta na duração certa, alinha os cortes com a batida e exporta o vídeo vertical, sem som, pronto para finalizar no CapCut.
 
-> Status: em planejamento. O spec fica em `docs/superpowers/specs/`.
+> Status: fatia 1 (roteiro) pronta: colar o roteiro, interpretar com a IA, editar e salvar os takes. O spec fica em `docs/superpowers/specs/`.
 
 ## Stack
 
@@ -39,6 +39,28 @@ pnpm install
 cp .env.example .env   # e preencha a ANTHROPIC_API_KEY
 pnpm dev               # API em :3333 e web em :5173
 ```
+
+## Como usar
+
+Fluxo da fatia 1 (roteiro):
+
+1. Abra http://localhost:5173 e cole o roteiro no campo **Roteiro**.
+2. Clique em **Interpretar roteiro**. A IA extrai os takes (nome, duração mínima e máxima).
+3. Edite os takes, adicione ou remova o que precisar e clique em **Salvar takes**.
+4. Se a IA não achar takes ou falhar, o app avisa e você preenche os takes à mão.
+
+Os projetos ficam salvos em `data/` (ignorada pelo git). A API está documentada em [docs/api.md](docs/api.md).
+
+### Variáveis do `.env`
+
+| Variável              | O que faz                                                                 |
+| --------------------- | ------------------------------------------------------------------------- |
+| `ANTHROPIC_API_KEY`   | chave da API do Claude (obrigatória com `claude`; a API não sobe sem ela) |
+| `SCRIPT_INTERPRETER`  | `claude` (real) ou `fake` (sem chamar a API, usado nos testes e2e)        |
+| `CLAUDE_SCRIPT_MODEL` | modelo usado para interpretar o roteiro                                   |
+| `DATA_DIR`            | pasta dos projetos (vazio = `data/` na raiz); relativa à pasta da API     |
+
+A API usa a porta 3333 (o proxy do Vite e o Playwright esperam essa porta).
 
 ## Scripts
 

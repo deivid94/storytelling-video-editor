@@ -20,7 +20,8 @@ export function App() {
           )}
           <TakesTable
             takes={editor.takes}
-            takeErrors={project.takeErrors}
+            // Os erros vêm do último salvamento; com edição local os números dos takes podem ter mudado.
+            takeErrors={editor.isDirty ? [] : project.takeErrors}
             isSaving={editor.status === 'saving'}
             isDirty={editor.isDirty}
             onChange={editor.updateTake}

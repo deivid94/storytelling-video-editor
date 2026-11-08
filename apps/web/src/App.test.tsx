@@ -80,4 +80,39 @@ describe('App', () => {
     expect(screen.getByRole('alert').textContent).toBe('Falha de rede.');
     expect(screen.getByRole('status').textContent).toBe('Takes salvos.');
   });
+
+  describe('erros de regra por take', () => {
+    const take = {
+      number: 1,
+      name: 'Abertura',
+      minSeconds: 1,
+      maxSeconds: 2,
+      action: 'Ação',
+      framing: null,
+      lens: null,
+      distance: null,
+      angle: null,
+      hasExecution: false,
+      notes: [],
+    };
+    const takeErrors = [{ takeNumber: 1, field: 'name' as const, message: 'Nome inválido.' }];
+
+    it('mostra os erros quando não há edição pendente', () => {
+      vi.mocked(useProjectEditor).mockReturnValue(
+        makeEditor({ project: { ...project, takeErrors }, takes: [take], isDirty: false }),
+      );
+      render(<App />);
+
+      expect(screen.getByText('Nome inválido.')).toBeDefined();
+    });
+
+    it('esconde os erros salvos enquanto há edição pendente', () => {
+      vi.mocked(useProjectEditor).mockReturnValue(
+        makeEditor({ project: { ...project, takeErrors }, takes: [take], isDirty: true }),
+      );
+      render(<App />);
+
+      expect(screen.queryByText('Nome inválido.')).toBeNull();
+    });
+  });
 });
