@@ -1,5 +1,5 @@
 import { render, screen, within } from '@testing-library/react';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import type { ClipMapping, MappedClip, ScriptTake } from '../api/projects';
 import { ClipMappingView } from './ClipMappingView';
 
@@ -134,5 +134,30 @@ describe('ClipMappingView', () => {
     render(<ClipMappingView mapping={makeMapping({ notices: ['Pasta vazia.'] })} takes={takes} />);
 
     expect(screen.getByRole('note').textContent).toBe('Pasta vazia.');
+  });
+});
+
+describe('ClipMappingView chaves dos avisos', () => {
+  it('renderiza avisos repetidos com o mesmo código sem erro de chave', () => {
+    const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    const warnings = [
+      { code: 'duplicate' as const, message: 'Rótulo A repetido.' },
+      { code: 'duplicate' as const, message: 'Rótulo B repetido.' },
+    ];
+    const clip = makeClip({
+      warnings: [
+        { code: 'lens-mismatch', message: 'Lente X.' },
+        { code: 'lens-mismatch', message: 'Lente Y.' },
+      ],
+    });
+    const mapping = makeMapping({ takes: [{ takeNumber: 1, clips: [clip], warnings }] });
+    render(<ClipMappingView mapping={mapping} takes={takes} />);
+
+    expect(screen.getByText('Rótulo A repetido.')).toBeDefined();
+    expect(screen.getByText('Rótulo B repetido.')).toBeDefined();
+    expect(screen.getByText('Lente X.')).toBeDefined();
+    expect(screen.getByText('Lente Y.')).toBeDefined();
+    expect(consoleError).not.toHaveBeenCalled();
+    consoleError.mockRestore();
   });
 });

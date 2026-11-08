@@ -18,7 +18,7 @@ function ClipItem({ clip }: { clip: MappedClip }) {
       {clip.warnings.length > 0 && (
         <ul>
           {clip.warnings.map((warning) => (
-            <li key={warning.code}>{warning.message}</li>
+            <li key={`${warning.code}-${warning.message}`}>{warning.message}</li>
           ))}
         </ul>
       )}
@@ -46,7 +46,7 @@ export function ClipMappingView({ mapping, takes }: ClipMappingViewProps) {
           {take.warnings.length > 0 && (
             <ul>
               {take.warnings.map((warning) => (
-                <li key={warning.code}>{warning.message}</li>
+                <li key={`${warning.code}-${warning.message}`}>{warning.message}</li>
               ))}
             </ul>
           )}
