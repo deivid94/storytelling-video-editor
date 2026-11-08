@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { ApiError, createProject, getProject, updateTakes } from './projects';
+import { ApiError, createProject, getProject, scanClips, updateTakes } from './projects';
 import type { ProjectView } from './projects';
 
 const view: ProjectView = {
@@ -9,6 +9,7 @@ const view: ProjectView = {
   takes: [],
   interpretationError: null,
   takeErrors: [],
+  clipMapping: null,
 };
 
 const fetchMock = vi.fn();
@@ -95,5 +96,26 @@ describe('updateTakes', () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ takes: [] }),
     });
+  });
+});
+
+describe('scanClips', () => {
+  it('faz PUT /api/projects/:id/clips-folder com a pasta', async () => {
+    fetchMock.mockResolvedValue(jsonResponse(view));
+
+    const result = await scanClips('abc', 'D:\\v');
+
+    expect(result).toEqual(view);
+    expect(fetchMock).toHaveBeenCalledWith('/api/projects/abc/clips-folder', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: '{"folder":"D:\\\\v"}',
+    });
+  });
+
+  it('erro 400 vira ApiError com a mensagem do corpo', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({ error: 'Pasta não encontrada.' }, 400));
+
+    await expect(scanClips('abc', 'x')).rejects.toThrow(new ApiError(400, 'Pasta não encontrada.'));
   });
 });

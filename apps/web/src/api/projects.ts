@@ -21,6 +21,60 @@ export interface TakeError {
   message: string;
 }
 
+// Tipos iguais aos de apps/api/src/types/clip.ts.
+export interface VideoInfo {
+  durationSeconds: number;
+  width: number; // já com a rotação aplicada
+  height: number; // já com a rotação aplicada
+  fps: number;
+  lensType: string | null;
+}
+
+export interface ScannedClip {
+  fileName: string;
+  takeNumber: number;
+  attempt: string | null;
+  video: VideoInfo | null; // null quando o arquivo não pôde ser lido
+  readError: string | null;
+}
+
+export interface IgnoredFile {
+  fileName: string;
+  reason: string;
+}
+
+export type ClipWarningCode = 'unreadable' | 'too-short' | 'lens-mismatch';
+export type TakeClipsWarningCode = 'missing' | 'no-readable-clip' | 'attempt-gap' | 'duplicate';
+
+export interface ClipWarning {
+  code: ClipWarningCode;
+  message: string;
+}
+
+export interface TakeClipsWarning {
+  code: TakeClipsWarningCode;
+  message: string;
+}
+
+export interface MappedClip extends ScannedClip {
+  warnings: ClipWarning[];
+}
+
+export interface TakeClips {
+  takeNumber: number;
+  clips: MappedClip[];
+  warnings: TakeClipsWarning[];
+}
+
+export interface ClipMapping {
+  folder: string;
+  scannedAt: string;
+  takes: TakeClips[];
+  orphanClips: MappedClip[];
+  ignoredFiles: IgnoredFile[];
+  notices: string[];
+}
+
 export interface ProjectView {
   id: string;
   createdAt: string;
@@ -28,6 +82,7 @@ export interface ProjectView {
   takes: ScriptTake[];
   interpretationError: string | null;
   takeErrors: TakeError[];
+  clipMapping: ClipMapping | null;
 }
 
 export class ApiError extends Error {
@@ -87,4 +142,11 @@ export function getProject(id: string): Promise<ProjectView> {
 
 export function updateTakes(id: string, takes: Omit<ScriptTake, 'number'>[]): Promise<ProjectView> {
   return request(`/api/projects/${encodeURIComponent(id)}/takes`, jsonRequest('PUT', { takes }));
+}
+
+export function scanClips(id: string, folder: string): Promise<ProjectView> {
+  return request(
+    `/api/projects/${encodeURIComponent(id)}/clips-folder`,
+    jsonRequest('PUT', { folder }),
+  );
 }

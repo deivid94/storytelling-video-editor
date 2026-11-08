@@ -19,6 +19,7 @@ function makeEditor(patch: Partial<ProjectEditor> = {}): ProjectEditor {
     addTake: vi.fn(),
     removeTake: vi.fn(),
     saveTakes: vi.fn(),
+    scanClips: vi.fn(),
     ...patch,
   };
 }
@@ -30,6 +31,7 @@ const project = {
   takes: [],
   interpretationError: null,
   takeErrors: [],
+  clipMapping: null,
 };
 
 describe('App', () => {

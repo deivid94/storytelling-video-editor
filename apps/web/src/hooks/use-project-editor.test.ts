@@ -1,17 +1,18 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { ApiError, createProject, updateTakes } from '../api/projects';
+import { ApiError, createProject, scanClips, updateTakes } from '../api/projects';
 import type { ProjectView, ScriptTake } from '../api/projects';
 import { createEmptyTake } from '../lib/takes';
 import { useProjectEditor } from './use-project-editor';
 
 vi.mock('../api/projects', async (importOriginal) => {
   const original = await importOriginal<typeof import('../api/projects')>();
-  return { ...original, createProject: vi.fn(), updateTakes: vi.fn() };
+  return { ...original, createProject: vi.fn(), updateTakes: vi.fn(), scanClips: vi.fn() };
 });
 
 const createProjectMock = vi.mocked(createProject);
 const updateTakesMock = vi.mocked(updateTakes);
+const scanClipsMock = vi.mocked(scanClips);
 
 function makeTake(number: number, name: string): ScriptTake {
   return { ...createEmptyTake(number), name };
@@ -25,6 +26,7 @@ function makeProject(takes: ScriptTake[]): ProjectView {
     takes,
     interpretationError: null,
     takeErrors: [],
+    clipMapping: null,
   };
 }
 
@@ -178,5 +180,67 @@ describe('useProjectEditor', () => {
     act(() => result.current.updateTake(0, { name: 'B' }));
 
     expect(result.current.savedMessage).toBeNull();
+  });
+
+  describe('scanClips', () => {
+    const mapping = {
+      folder: 'D:\\v',
+      scannedAt: '2026-11-07T00:00:00.000Z',
+      takes: [],
+      orphanClips: [],
+      ignoredFiles: [],
+      notices: [],
+    };
+
+    it('atualiza clipMapping e mantém os takes editados', async () => {
+      const { result } = await renderWithProject([makeTake(1, 'A')]);
+      act(() => result.current.updateTake(0, { name: 'Editado' }));
+      scanClipsMock.mockResolvedValue({ ...makeProject([makeTake(1, 'A')]), clipMapping: mapping });
+
+      await act(() => result.current.scanClips('D:\\v'));
+
+      expect(scanClipsMock).toHaveBeenCalledWith('p1', 'D:\\v');
+      expect(result.current.project?.clipMapping).toEqual(mapping);
+      expect(result.current.takes[0]?.name).toBe('Editado');
+      expect(result.current.isDirty).toBe(true);
+    });
+
+    it('mostra o erro quando falha', async () => {
+      const { result } = await renderWithProject([makeTake(1, 'A')]);
+      scanClipsMock.mockRejectedValue(new ApiError(400, 'Pasta não encontrada.'));
+
+      await act(() => result.current.scanClips('x'));
+
+      expect(result.current.error).toBe('Pasta não encontrada.');
+      expect(result.current.status).toBe('idle');
+    });
+
+    it('ignora a segunda chamada durante a primeira e usa status scanning', async () => {
+      const { result } = await renderWithProject([makeTake(1, 'A')]);
+      let resolve!: (value: ProjectView) => void;
+      scanClipsMock.mockReturnValue(new Promise((r) => (resolve = r)));
+
+      let first!: Promise<void>;
+      act(() => {
+        first = result.current.scanClips('a');
+        void result.current.scanClips('b');
+      });
+      expect(result.current.status).toBe('scanning');
+      await act(async () => {
+        resolve(makeProject([makeTake(1, 'A')]));
+        await first;
+      });
+
+      expect(scanClipsMock).toHaveBeenCalledTimes(1);
+      expect(result.current.status).toBe('idle');
+    });
+
+    it('sem projeto não chama a API', async () => {
+      const { result } = renderHook(() => useProjectEditor());
+
+      await act(() => result.current.scanClips('x'));
+
+      expect(scanClipsMock).not.toHaveBeenCalled();
+    });
   });
 });
