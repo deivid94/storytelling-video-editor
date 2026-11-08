@@ -14,7 +14,7 @@ Todas as rotas ficam sob `/api`. Corpo e respostas em JSON; o corpo aceito tem n
 
 - `scriptText`: texto do roteiro, até 20.000 caracteres.
 - `takes`: lista de até 50 takes (formato abaixo). Substitui todos os takes do projeto.
-- `folder`: caminho completo da pasta dos clipes (até 1000 caracteres, ex.: `D:Videos	reino`). A API lê a pasta com o ffprobe, guarda o resultado no projeto e devolve o `clipMapping`. Cada nova leitura substitui a anterior.
+- `folder`: caminho completo da pasta dos clipes (até 1000 caracteres, ex.: `D:\Videos\treino`). A API lê a pasta com o ffprobe, guarda o resultado no projeto e devolve o `clipMapping`. Cada nova leitura substitui a anterior.
 
 ## ProjectView
 
@@ -54,7 +54,7 @@ Todas as rotas ficam sob `/api`. Corpo e respostas em JSON; o corpo aceito tem n
 
 ```json
 {
-  "folder": "D:\Videos\treino",
+  "folder": "D:\\Videos\\treino",
   "scannedAt": "2026-01-01T00:00:00.000Z",
   "takes": [
     {
@@ -111,7 +111,7 @@ Sempre neste formato:
 | 400    | `O roteiro não tem texto, só símbolos ou emojis.`                                              | `scriptText` sem letras nem números            |
 | 400    | `O roteiro passa de 20.000 caracteres.`                                                        | `scriptText` grande demais                     |
 | 400    | `Informe a pasta dos clipes.`                                                                  | `folder` só com espaços                        |
-| 400    | `Use o caminho completo da pasta (ex.: D:Videos	reino).`                                        | `folder` não é um caminho absoluto             |
+| 400    | `Use o caminho completo da pasta (ex.: D:\Videos\treino).`                                     | `folder` não é um caminho absoluto             |
 | 400    | `A pasta não existe.`                                                                          | Caminho inexistente                            |
 | 400    | `O caminho informado não é uma pasta.`                                                         | O caminho aponta para um arquivo               |
 | 400    | `Sem permissão para ler a pasta.`                                                              | O sistema negou o acesso à pasta               |

@@ -51,7 +51,7 @@ Fluxo da fatia 1 (roteiro):
 
 Fluxo da fatia 2 (clipes):
 
-1. Em **Pasta dos clipes**, informe o caminho completo da pasta (ex.: `D:Videos	reino`) e clique em **Ler clipes**.
+1. Em **Pasta dos clipes**, informe o caminho completo da pasta (ex.: `D:\Videos\treino`) e clique em **Ler clipes**.
 2. O app mostra os clipes de cada take (`take1.mov`, `take3a.mp4`...) com avisos de lente diferente, clipe curto, tentativa faltando e arquivos ignorados.
 
 Os projetos ficam salvos em `data/` (ignorada pelo git). A API está documentada em [docs/api.md](docs/api.md).
