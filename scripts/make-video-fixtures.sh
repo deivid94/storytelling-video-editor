@@ -34,4 +34,13 @@ head -c 2000 "$OUT/vertical-plain.mp4" > "$OUT/truncated.mp4"
 # texto puro com extensão de vídeo
 printf 'isto não é um vídeo' > "$OUT/not-a-video.mp4"
 
+# pasta de clipes para o e2e da fatia 2 (cópias; leiame.txt deve ser ignorado)
+CLIPS="$OUT/clips-e2e"
+mkdir -p "$CLIPS"
+cp "$OUT/vertical-rotated-52mm.mp4" "$CLIPS/take1.mp4"
+cp "$OUT/vertical-plain.mp4" "$CLIPS/take2a.mp4"
+cp "$OUT/vertical-plain.mp4" "$CLIPS/take2c.mp4"
+cp "$OUT/vertical-plain.mp4" "$CLIPS/take9.mp4"
+printf 'arquivo que não é clipe' > "$CLIPS/leiame.txt"
+
 echo "Fixtures geradas em $OUT"
