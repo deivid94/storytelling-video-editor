@@ -32,6 +32,10 @@ const editableTakeSchema = interpretedTakeSchema.extend({
   notes: z.array(z.string()).max(20),
 });
 
+export const scanClipsBodySchema = z.object({
+  folder: z.string().max(1000),
+});
+
 export const updateTakesBodySchema = z.object({
   takes: z.array(editableTakeSchema).max(MAX_TAKES),
 });

@@ -21,7 +21,7 @@ const projectService = createProjectService({
   projectRepository: createFileProjectRepository(config.dataDir),
   scriptInterpreter,
   clipFolderRepository: createClipFolderRepository(),
-  videoProber: createFfprobeVideoProber({ ffprobePath: 'ffprobe' }),
+  videoProber: createFfprobeVideoProber({ ffprobePath: config.ffprobePath }),
   now: () => new Date(),
   createId: () => randomUUID(),
 });

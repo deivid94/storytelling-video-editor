@@ -16,5 +16,9 @@ export function createProjectController(projectService: ProjectService) {
     async updateTakes(request: Request<{ id: string }>, response: Response) {
       response.json(await projectService.updateTakes(request.params.id, request.body.takes));
     },
+
+    async scanClips(request: Request<{ id: string }>, response: Response) {
+      response.json(await projectService.scanClips(request.params.id, request.body.folder));
+    },
   };
 }

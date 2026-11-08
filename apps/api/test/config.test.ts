@@ -42,6 +42,23 @@ describe('loadConfig', () => {
     expect(() => loadConfig({ ANTHROPIC_API_KEY: 'sk-test', [key]: value })).toThrow(key);
   });
 
+  describe('FFPROBE_PATH', () => {
+    const base = { ANTHROPIC_API_KEY: 'sk-test' };
+
+    it('usa ffprobe do PATH por padrão', () => {
+      expect(loadConfig(base).ffprobePath).toBe('ffprobe');
+    });
+
+    it('lê o caminho informado', () => {
+      const ffprobePath = String.raw`C:\ffmpeg\bin\ffprobe.exe`;
+      expect(loadConfig({ ...base, FFPROBE_PATH: ffprobePath }).ffprobePath).toBe(ffprobePath);
+    });
+
+    it('trata valor em branco como padrão', () => {
+      expect(loadConfig({ ...base, FFPROBE_PATH: '  ' }).ffprobePath).toBe('ffprobe');
+    });
+  });
+
   describe('ANTHROPIC_API_KEY', () => {
     const message =
       'ANTHROPIC_API_KEY não definida. Preencha o .env ou use SCRIPT_INTERPRETER=fake.';
