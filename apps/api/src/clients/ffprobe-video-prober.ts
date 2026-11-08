@@ -26,6 +26,14 @@ interface ProbeOutput {
   streams?: ProbeStream[];
 }
 
+// Códigos de quando o ffprobe não pode ser iniciado: não existe, é uma pasta ou não é executável.
+// No Windows, um arquivo que não é programa dá EFTYPE.
+const SPAWN_FAILURE_CODES = ['ENOENT', 'EACCES', 'EISDIR', 'EPERM', 'EFTYPE'];
+
+function isSpawnFailure(error: NodeJS.ErrnoException): boolean {
+  return SPAWN_FAILURE_CODES.includes(error.code ?? '');
+}
+
 function runFfprobe(ffprobePath: string, filePath: string, timeoutMs: number): Promise<string> {
   const args = [
     '-v',
@@ -37,20 +45,26 @@ function runFfprobe(ffprobePath: string, filePath: string, timeoutMs: number): P
     filePath,
   ];
   return new Promise((resolve, reject) => {
-    execFile(ffprobePath, args, { timeout: timeoutMs }, (error, stdout) => {
+    const onDone = (error: Error | null, stdout: string): void => {
       if (!error) {
         resolve(stdout);
         return;
       }
       const failure = error as NodeJS.ErrnoException & { killed?: boolean };
-      if (failure.code === 'ENOENT') {
+      if (isSpawnFailure(failure)) {
         reject(new AppError(500, FFPROBE_NOT_FOUND_MESSAGE));
       } else if (failure.killed) {
         reject(new VideoProbeError(PROBE_TIMEOUT_MESSAGE, { cause: error }));
       } else {
         reject(new VideoProbeError(UNREADABLE_VIDEO_MESSAGE, { cause: error }));
       }
-    });
+    };
+    // Em alguns casos (ex.: EFTYPE no Windows) o execFile lança na hora, sem chamar o callback.
+    try {
+      execFile(ffprobePath, args, { timeout: timeoutMs }, onDone);
+    } catch (error) {
+      onDone(error as Error, '');
+    }
   });
 }
 

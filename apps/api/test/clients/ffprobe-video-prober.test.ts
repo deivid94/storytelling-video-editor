@@ -50,6 +50,22 @@ describe('createFfprobeVideoProber', () => {
     );
   });
 
+  it('FFPROBE_PATH apontando para uma pasta também vira a mensagem de instalação', async () => {
+    const folder = createFfprobeVideoProber({
+      ffprobePath: path.dirname(fixture('vertical-plain.mp4')),
+    });
+    await expect(folder.probe(fixture('vertical-plain.mp4'))).rejects.toEqual(
+      new AppError(500, FFPROBE_NOT_FOUND_MESSAGE),
+    );
+  });
+
+  it('FFPROBE_PATH apontando para um arquivo que não executa vira a mensagem de instalação', async () => {
+    const notExecutable = createFfprobeVideoProber({ ffprobePath: fixture('not-a-video.mp4') });
+    await expect(notExecutable.probe(fixture('vertical-plain.mp4'))).rejects.toEqual(
+      new AppError(500, FFPROBE_NOT_FOUND_MESSAGE),
+    );
+  });
+
   it('timeout vira VideoProbeError', async () => {
     const slow = createFfprobeVideoProber({ ffprobePath: 'ffprobe', timeoutMs: 1 });
     await expect(slow.probe(fixture('vertical-plain.mp4'))).rejects.toEqual(
