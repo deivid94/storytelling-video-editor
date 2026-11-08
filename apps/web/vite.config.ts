@@ -8,7 +8,7 @@ export default defineConfig({
     strictPort: true,
     // Em dev, as chamadas /api vão para o backend.
     proxy: {
-      '/api': 'http://localhost:3333',
+      '/api': 'http://127.0.0.1:3333',
     },
   },
 });

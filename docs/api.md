@@ -112,6 +112,7 @@ Sempre neste formato:
 | 400    | `O roteiro passa de 20.000 caracteres.`                                                        | `scriptText` grande demais                     |
 | 400    | `Informe a pasta dos clipes.`                                                                  | `folder` só com espaços                        |
 | 400    | `Use o caminho completo da pasta (ex.: D:\Videos\treino).`                                     | `folder` não é um caminho absoluto             |
+| 400    | `Use uma pasta deste computador, não um caminho de rede.`                                      | `folder` começa com `\` ou `//` (rede/UNC)     |
 | 400    | `A pasta não existe.`                                                                          | Caminho inexistente                            |
 | 400    | `O caminho informado não é uma pasta.`                                                         | O caminho aponta para um arquivo               |
 | 400    | `Sem permissão para ler a pasta.`                                                              | O sistema negou o acesso à pasta               |

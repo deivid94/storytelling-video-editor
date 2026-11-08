@@ -66,7 +66,7 @@ Os projetos ficam salvos em `data/` (ignorada pelo git). A API está documentada
 | `DATA_DIR`            | pasta dos projetos (vazio = `data/` na raiz); relativa à pasta da API     |
 | `FFPROBE_PATH`        | caminho do `ffprobe` (vazio = usa o `ffprobe` do PATH)                    |
 
-A API usa a porta 3333 (o proxy do Vite e o Playwright esperam essa porta).
+A API usa a porta 3333 e escuta só em `127.0.0.1` (outros aparelhos da rede não a alcançam). O proxy do Vite e o Playwright esperam esse endereço e porta.
 
 ## Scripts
 

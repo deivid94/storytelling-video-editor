@@ -8,7 +8,8 @@ export interface AppConfig {
   ffprobePath: string;
 }
 
-// O proxy do Vite (apps/web) e o Playwright esperam a API na porta 3333; mudar API_PORT exige ajustá-los.
+// A API escuta só em 127.0.0.1. O proxy do Vite (apps/web) e o Playwright esperam a porta 3333
+// nesse endereço; mudar API_PORT exige ajustá-los.
 const DEFAULT_PORT = 3333;
 const DEFAULT_FFPROBE_PATH = 'ffprobe';
 const DEFAULT_MODEL = 'claude-opus-5-5';

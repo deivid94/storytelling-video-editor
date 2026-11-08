@@ -90,6 +90,15 @@ describe('normalizeFolderInput', () => {
   });
 });
 
+describe('normalizeFolderInput com caminho de rede', () => {
+  it.each(['\\\\servidor\\pasta', '//servidor/pasta'])('%j dá erro 400', (text) => {
+    const error = errorOf(() => normalizeFolderInput(text));
+    expect(error).toBeInstanceOf(AppError);
+    expect(error.status).toBe(400);
+    expect(error.message).toBe('Use uma pasta deste computador, não um caminho de rede.');
+  });
+});
+
 describe('formatSecondsShort', () => {
   it.each([
     [3.96, '3,9s'],

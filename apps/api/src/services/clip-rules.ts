@@ -25,6 +25,10 @@ export function normalizeFolderInput(text: string): string {
   if (folder === '') {
     throw new AppError(400, 'Informe a pasta dos clipes.');
   }
+  // Caminho de rede (UNC): o Windows tentaria entrar em outro computador.
+  if (folder.startsWith('\\') || folder.startsWith('//')) {
+    throw new AppError(400, 'Use uma pasta deste computador, não um caminho de rede.');
+  }
   if (!path.isAbsolute(folder)) {
     throw new AppError(400, 'Use o caminho completo da pasta (ex.: D:\\Videos\\treino).');
   }
