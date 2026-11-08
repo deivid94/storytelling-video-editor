@@ -1,0 +1,32 @@
+main {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 16px;
+  font-family: system-ui, sans-serif;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+textarea {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+fieldset {
+  margin-bottom: 16px;
+}
+
+.alert,
+.field-error {
+  color: #b00020;
+}
+
+.field-error {
+  margin: 0 0 8px;
+  font-size: 0.875rem;
+}
