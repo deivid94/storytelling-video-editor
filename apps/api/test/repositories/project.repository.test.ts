@@ -38,6 +38,7 @@ describe('createFileProjectRepository', () => {
         },
       ],
       interpretationError: null,
+      clipScan: null,
     };
   });
 
@@ -85,5 +86,14 @@ describe('createFileProjectRepository', () => {
   it('não deixa arquivo temporário para trás', async () => {
     await repository.save(project);
     expect(await fs.readdir(path.join(dataDir, 'projects', project.id))).toEqual(['project.json']);
+  });
+
+  it('projeto salvo sem clipScan abre com clipScan null', async () => {
+    const legacy: Partial<Project> = { ...project };
+    delete legacy.clipScan;
+    const dir = path.join(dataDir, 'projects', project.id);
+    await fs.mkdir(dir, { recursive: true });
+    await fs.writeFile(path.join(dir, 'project.json'), JSON.stringify(legacy));
+    expect(await repository.findById(project.id)).toEqual({ ...legacy, clipScan: null });
   });
 });

@@ -9,6 +9,7 @@ import {
   createFakeScriptInterpreter,
   FAKE_TAKES,
 } from '../../src/clients/fake-script-interpreter.js';
+import { createClipFolderRepository } from '../../src/repositories/clip-folder.repository.js';
 import { createFileProjectRepository } from '../../src/repositories/project.repository.js';
 import { createProjectService, type ProjectService } from '../../src/services/project.service.js';
 
@@ -21,6 +22,8 @@ beforeEach(async () => {
     projectService: createProjectService({
       projectRepository: createFileProjectRepository(dataDir),
       scriptInterpreter: createFakeScriptInterpreter(),
+      clipFolderRepository: createClipFolderRepository(),
+      videoProber: { probe: () => Promise.reject(new Error('não usado')) },
       now: () => new Date('2026-01-01T00:00:00Z'),
       createId: () => randomUUID(),
     }),
@@ -158,6 +161,7 @@ describe('erros inesperados', () => {
       createFromScript: () => Promise.reject(new Error('segredo')),
       getById: () => Promise.reject(new Error('segredo')),
       updateTakes: () => Promise.reject(new Error('segredo')),
+      scanClips: () => Promise.reject(new Error('segredo')),
     };
 
     const response = await request(createApp({ projectService: failingService }))

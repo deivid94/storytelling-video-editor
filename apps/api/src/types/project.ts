@@ -1,3 +1,5 @@
+import type { ClipMapping, ClipScan } from './clip.js';
+
 export type Framing = 'close' | 'medium' | 'wide';
 
 export interface ScriptTake {
@@ -28,8 +30,10 @@ export interface Project {
   scriptText: string;
   takes: ScriptTake[];
   interpretationError: string | null;
+  clipScan: ClipScan | null; // última leitura da pasta de clipes; null enquanto não houve
 }
 
 export interface ProjectView extends Project {
   takeErrors: TakeError[];
+  clipMapping: ClipMapping | null; // calculado a cada resposta a partir dos takes e do clipScan
 }
