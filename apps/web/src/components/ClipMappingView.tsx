@@ -50,9 +50,7 @@ export function ClipMappingView({ mapping, takes }: ClipMappingViewProps) {
               ))}
             </ul>
           )}
-          {take.clips.length === 0 ? (
-            <p>Nenhum clipe para este take.</p>
-          ) : (
+          {take.clips.length > 0 && (
             <ul>
               {take.clips.map((clip) => (
                 <ClipItem key={clip.fileName} clip={clip} />

@@ -60,17 +60,20 @@ describe('ClipMappingView', () => {
     expect(within(screen.getByRole('group')).getByText('Take 1')).toBeDefined();
   });
 
-  it('take faltando mostra a mensagem e o aviso dentro do grupo', () => {
+  it('take faltando mostra o aviso uma só vez dentro do grupo', () => {
     const mapping = makeMapping({
       takes: [
-        { takeNumber: 2, clips: [], warnings: [{ code: 'missing', message: 'Take 2 sem clipe.' }] },
+        {
+          takeNumber: 2,
+          clips: [],
+          warnings: [{ code: 'missing', message: 'Nenhum clipe para este take.' }],
+        },
       ],
     });
     render(<ClipMappingView mapping={mapping} takes={takes} />);
 
     const group = screen.getByRole('group', { name: 'Clipes do take 2' });
-    expect(within(group).getByText('Nenhum clipe para este take.')).toBeDefined();
-    expect(within(group).getByText('Take 2 sem clipe.')).toBeDefined();
+    expect(within(group).getAllByText('Nenhum clipe para este take.').length).toBe(1);
   });
 
   it('mostra o aviso de lente no grupo certo', () => {
