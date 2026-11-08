@@ -188,7 +188,23 @@ describe('createProjectService', () => {
       expect(view.clipMapping?.ignoredFiles).toEqual([
         { fileName: 'notas.txt', reason: UNSUPPORTED_EXTENSION_REASON },
       ]);
-      expect(view.clipScan?.scannedAt).toBe('2026-11-06T12:00:00.000Z');
+      expect(view).not.toHaveProperty('clipScan');
+      expect((await repository.findById(FIXED_ID))?.clipScan?.scannedAt).toBe(
+        '2026-11-06T12:00:00.000Z',
+      );
+    });
+
+    it('mantém os takes salvos enquanto a pasta era lida', async () => {
+      await touch('take1.mov');
+      const newTakes = FAKE_TAKES.slice(0, 1).map((t) => ({ ...t, name: 'Editado no meio' }));
+      probe.mockImplementationOnce(async () => {
+        await service.updateTakes(FIXED_ID, newTakes);
+        return VIDEO;
+      });
+      await service.scanClips(FIXED_ID, clipsDir);
+      const saved = await repository.findById(FIXED_ID);
+      expect(saved?.takes.map((t) => t.name)).toEqual(['Editado no meio']);
+      expect(saved?.clipScan?.clips).toHaveLength(1);
     });
 
     it('só lê com o ffprobe os arquivos take', async () => {
@@ -204,8 +220,8 @@ describe('createProjectService', () => {
         if (path.basename(filePath) === 'take1.mov') throw new VideoProbeError('x');
         return VIDEO;
       });
-      const view = await service.scanClips(FIXED_ID, clipsDir);
-      const clips = view.clipScan?.clips ?? [];
+      await service.scanClips(FIXED_ID, clipsDir);
+      const clips = (await repository.findById(FIXED_ID))?.clipScan?.clips ?? [];
       expect(clips.find((c) => c.fileName === 'take1.mov')).toMatchObject({
         video: null,
         readError: 'x',
@@ -247,7 +263,8 @@ describe('createProjectService', () => {
       await service.scanClips(FIXED_ID, clipsDir);
       await fs.rm(path.join(clipsDir, 'take2a.mp4'));
       const view = await service.scanClips(FIXED_ID, clipsDir);
-      expect(view.clipScan?.clips.map((c) => c.fileName)).toEqual(['take1.mov']);
+      const saved = await repository.findById(FIXED_ID);
+      expect(saved?.clipScan?.clips.map((c) => c.fileName)).toEqual(['take1.mov']);
       expect(JSON.stringify(view.clipMapping)).not.toContain('take2a.mp4');
     });
 
@@ -264,6 +281,6 @@ describe('createProjectService', () => {
   it('projeto novo vem com clipMapping null', async () => {
     const view = await service.createFromScript('roteiro');
     expect(view.clipMapping).toBeNull();
-    expect(view.clipScan).toBeNull();
+    expect(view).not.toHaveProperty('clipScan');
   });
 });

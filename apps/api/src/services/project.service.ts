@@ -34,10 +34,11 @@ export interface ProjectService {
 }
 
 function toView(project: Project): ProjectView {
+  const { clipScan, ...rest } = project;
   return {
-    ...project,
+    ...rest,
     takeErrors: findTakeErrors(project.takes),
-    clipMapping: project.clipScan ? buildClipMapping(project.takes, project.clipScan) : null,
+    clipMapping: clipScan ? buildClipMapping(project.takes, clipScan) : null,
   };
 }
 
@@ -114,7 +115,7 @@ export function createProjectService(deps: ProjectServiceDeps): ProjectService {
   }
 
   async function scanClips(id: string, folderInput: string): Promise<ProjectView> {
-    const project = await findOrThrow(id);
+    await findOrThrow(id);
     const folder = normalizeFolderInput(folderInput);
     const fileNames = await clipFolderRepository.listFileNames(folder);
     const clips: ScannedClip[] = [];
@@ -129,7 +130,9 @@ export function createProjectService(deps: ProjectServiceDeps): ProjectService {
       }
     }
     const clipScan: ClipScan = { folder, scannedAt: now().toISOString(), clips, ignoredFiles };
-    const updated: Project = { ...project, clipScan };
+    // A leitura é lenta: relê o projeto para não apagar takes salvos nesse meio tempo.
+    const fresh = await findOrThrow(id);
+    const updated: Project = { ...fresh, clipScan };
     await projectRepository.save(updated);
     return toView(updated);
   }

@@ -33,7 +33,8 @@ export interface Project {
   clipScan: ClipScan | null; // última leitura da pasta de clipes; null enquanto não houve
 }
 
-export interface ProjectView extends Project {
+// O clipScan bruto não sai da API: o clipMapping já traz tudo que a tela usa.
+export interface ProjectView extends Omit<Project, 'clipScan'> {
   takeErrors: TakeError[];
   clipMapping: ClipMapping | null; // calculado a cada resposta a partir dos takes e do clipScan
 }
