@@ -12,3 +12,4 @@ test-results/
 *.mov
 *.mp4
 !fixtures/videos/*.mp4
+!fixtures/videos/clips-e2e/*.mp4

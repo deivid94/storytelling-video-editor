@@ -1,4 +1,6 @@
 import './App.css';
+import { ClipMappingView } from './components/ClipMappingView';
+import { ClipsFolderForm } from './components/ClipsFolderForm';
 import { InterpretationAlert } from './components/InterpretationAlert';
 import { ScriptForm } from './components/ScriptForm';
 import { TakesTable } from './components/TakesTable';
@@ -30,6 +32,19 @@ export function App() {
             onSave={editor.saveTakes}
           />
           {editor.savedMessage !== null && <p role="status">{editor.savedMessage}</p>}
+          <ClipsFolderForm
+            initialFolder={project.clipMapping?.folder ?? ''}
+            isScanning={editor.status === 'scanning'}
+            onSubmit={editor.scanClips}
+          />
+          {project.clipMapping !== null && (
+            <>
+              {editor.isDirty && (
+                <p role="note">Salve os takes para atualizar os avisos dos clipes.</p>
+              )}
+              <ClipMappingView mapping={project.clipMapping} takes={project.takes} />
+            </>
+          )}
         </>
       )}
       {editor.error !== null && (

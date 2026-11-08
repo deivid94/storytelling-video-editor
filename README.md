@@ -4,7 +4,7 @@ App pessoal que monta vídeos curtos de treino a partir de um roteiro.
 
 Você entrega o **roteiro** (gerado pelo Claude, com etapas, tempo, ângulo e lente de cada take), os **clipes brutos** (gravados no app Blackmagic Camera e nomeados `take1`, `take2`, `take3a`...) e, opcionalmente, a **música**. O app encontra o melhor trecho de cada clipe, corta na duração certa, alinha os cortes com a batida e exporta o vídeo vertical, sem som, pronto para finalizar no CapCut.
 
-> Status: fatia 1 (roteiro) pronta: colar o roteiro, interpretar com a IA, editar e salvar os takes. O spec fica em `docs/superpowers/specs/`.
+> Status: fatias 1 (roteiro) e 2 (clipes) prontas: interpretar o roteiro, editar os takes e ler a pasta dos clipes com avisos por take. O spec fica em `docs/superpowers/specs/`.
 
 ## Stack
 
@@ -30,7 +30,7 @@ docs/    documentação, specs e planos
 
 - Node.js 26+
 - pnpm 12+
-- ffmpeg no PATH
+- ffmpeg no PATH (o app usa o `ffprobe` que vem junto; se ele não estiver no PATH, defina `FFPROBE_PATH`)
 
 ## Como rodar
 
@@ -49,6 +49,11 @@ Fluxo da fatia 1 (roteiro):
 3. Edite os takes, adicione ou remova o que precisar e clique em **Salvar takes**.
 4. Se a IA não achar takes ou falhar, o app avisa e você preenche os takes à mão.
 
+Fluxo da fatia 2 (clipes):
+
+1. Em **Pasta dos clipes**, informe o caminho completo da pasta (ex.: `D:\Videos\treino`) e clique em **Ler clipes**.
+2. O app mostra os clipes de cada take (`take1.mov`, `take3a.mp4`...) com avisos de lente diferente, clipe curto, tentativa faltando e arquivos ignorados.
+
 Os projetos ficam salvos em `data/` (ignorada pelo git). A API está documentada em [docs/api.md](docs/api.md).
 
 ### Variáveis do `.env`
@@ -59,8 +64,9 @@ Os projetos ficam salvos em `data/` (ignorada pelo git). A API está documentada
 | `SCRIPT_INTERPRETER`  | `claude` (real) ou `fake` (sem chamar a API, usado nos testes e2e)        |
 | `CLAUDE_SCRIPT_MODEL` | modelo usado para interpretar o roteiro                                   |
 | `DATA_DIR`            | pasta dos projetos (vazio = `data/` na raiz); relativa à pasta da API     |
+| `FFPROBE_PATH`        | caminho do `ffprobe` (vazio = usa o `ffprobe` do PATH)                    |
 
-A API usa a porta 3333 (o proxy do Vite e o Playwright esperam essa porta).
+A API usa a porta 3333 e escuta só em `127.0.0.1` (outros aparelhos da rede não a alcançam). O proxy do Vite e o Playwright esperam esse endereço e porta.
 
 ## Scripts
 

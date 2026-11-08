@@ -1,9 +1,14 @@
 import { useRef, useState } from 'react';
-import { ApiError, createProject, updateTakes } from '../api/projects';
+import {
+  ApiError,
+  createProject,
+  scanClips as scanClipsRequest,
+  updateTakes,
+} from '../api/projects';
 import type { ProjectView, ScriptTake } from '../api/projects';
 import { createEmptyTake, renumberTakes } from '../lib/takes';
 
-export type EditorStatus = 'idle' | 'loading' | 'saving';
+export type EditorStatus = 'idle' | 'loading' | 'saving' | 'scanning';
 
 export interface ProjectEditor {
   project: ProjectView | null;
@@ -17,6 +22,7 @@ export interface ProjectEditor {
   addTake(): void;
   removeTake(index: number): void;
   saveTakes(): Promise<void>;
+  scanClips(folder: string): Promise<void>;
 }
 
 const SAVED_MESSAGE = 'Takes salvos.';
@@ -75,6 +81,14 @@ export function useProjectEditor(): ProjectEditor {
     });
   }
 
+  function scanClips(folder: string) {
+    return runRequest('scanning', async () => {
+      if (project === null) return;
+      // Só o mapeamento muda: os takes locais (editados ou não) ficam como estão.
+      setProject(await scanClipsRequest(project.id, folder));
+    });
+  }
+
   function editTakes(change: (current: ScriptTake[]) => ScriptTake[]) {
     setTakes((current) => renumberTakes(change(current)));
     setSavedMessage(null);
@@ -104,5 +118,6 @@ export function useProjectEditor(): ProjectEditor {
     addTake,
     removeTake,
     saveTakes,
+    scanClips,
   };
 }

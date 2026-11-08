@@ -9,6 +9,12 @@ import {
   createFakeScriptInterpreter,
   FAKE_TAKES,
 } from '../../src/clients/fake-script-interpreter.js';
+import { FFPROBE_NOT_FOUND_MESSAGE } from '../../src/clients/ffprobe-video-prober.js';
+import { AppError } from '../../src/errors/app-error.js';
+import {
+  createClipFolderRepository,
+  FOLDER_NOT_FOUND_MESSAGE,
+} from '../../src/repositories/clip-folder.repository.js';
 import { createFileProjectRepository } from '../../src/repositories/project.repository.js';
 import { createProjectService, type ProjectService } from '../../src/services/project.service.js';
 
@@ -21,6 +27,8 @@ beforeEach(async () => {
     projectService: createProjectService({
       projectRepository: createFileProjectRepository(dataDir),
       scriptInterpreter: createFakeScriptInterpreter(),
+      clipFolderRepository: createClipFolderRepository(),
+      videoProber: { probe: () => Promise.reject(new Error('não usado')) },
       now: () => new Date('2026-01-01T00:00:00Z'),
       createId: () => randomUUID(),
     }),
@@ -151,6 +159,79 @@ describe('PUT /api/projects/:id/takes', () => {
   });
 });
 
+describe('PUT /api/projects/:id/clips-folder', () => {
+  function appWithScanClips(scanClips: ProjectService['scanClips']) {
+    const notUsed = () => Promise.reject(new Error('não usado'));
+    return createApp({
+      projectService: {
+        createFromScript: notUsed,
+        getById: notUsed,
+        updateTakes: notUsed,
+        scanClips,
+      },
+    });
+  }
+
+  it('chama scanClips com id e pasta e responde 200 com o view', async () => {
+    const view = { id: 'p1', clipMapping: { entries: [], warnings: [] } };
+    const scanClips = vi.fn().mockResolvedValue(view);
+
+    const response = await request(appWithScanClips(scanClips))
+      .put('/api/projects/p1/clips-folder')
+      .send({ folder: '/videos/clipes' });
+
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(view);
+    expect(scanClips).toHaveBeenCalledWith('p1', '/videos/clipes');
+  });
+
+  it('responde 400 sem o campo folder', async () => {
+    const scanClips = vi.fn();
+
+    const response = await request(appWithScanClips(scanClips))
+      .put('/api/projects/p1/clips-folder')
+      .send({});
+
+    expect(response.status).toBe(400);
+    expect(response.body.error).toBe('Dados inválidos.');
+    expect(response.body.details[0].path).toBe('folder');
+    expect(scanClips).not.toHaveBeenCalled();
+  });
+
+  it('responde 400 para caminho com mais de 1000 caracteres', async () => {
+    const scanClips = vi.fn();
+
+    const response = await request(appWithScanClips(scanClips))
+      .put('/api/projects/p1/clips-folder')
+      .send({ folder: 'x'.repeat(1001) });
+
+    expect(response.status).toBe(400);
+    expect(scanClips).not.toHaveBeenCalled();
+  });
+
+  it('repassa o erro 400 de pasta inexistente', async () => {
+    const scanClips = vi.fn().mockRejectedValue(new AppError(400, FOLDER_NOT_FOUND_MESSAGE));
+
+    const response = await request(appWithScanClips(scanClips))
+      .put('/api/projects/p1/clips-folder')
+      .send({ folder: 'nada' });
+
+    expect(response.status).toBe(400);
+    expect(response.body).toEqual({ error: FOLDER_NOT_FOUND_MESSAGE });
+  });
+
+  it('repassa o erro 500 de ffprobe não encontrado', async () => {
+    const scanClips = vi.fn().mockRejectedValue(new AppError(500, FFPROBE_NOT_FOUND_MESSAGE));
+
+    const response = await request(appWithScanClips(scanClips))
+      .put('/api/projects/p1/clips-folder')
+      .send({ folder: 'x' });
+
+    expect(response.status).toBe(500);
+    expect(response.body).toEqual({ error: FFPROBE_NOT_FOUND_MESSAGE });
+  });
+});
+
 describe('erros inesperados', () => {
   it('responde 500 sem vazar detalhes', async () => {
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -158,6 +239,7 @@ describe('erros inesperados', () => {
       createFromScript: () => Promise.reject(new Error('segredo')),
       getById: () => Promise.reject(new Error('segredo')),
       updateTakes: () => Promise.reject(new Error('segredo')),
+      scanClips: () => Promise.reject(new Error('segredo')),
     };
 
     const response = await request(createApp({ projectService: failingService }))

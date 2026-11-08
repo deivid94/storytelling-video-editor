@@ -19,6 +19,7 @@ function makeEditor(patch: Partial<ProjectEditor> = {}): ProjectEditor {
     addTake: vi.fn(),
     removeTake: vi.fn(),
     saveTakes: vi.fn(),
+    scanClips: vi.fn(),
     ...patch,
   };
 }
@@ -30,6 +31,7 @@ const project = {
   takes: [],
   interpretationError: null,
   takeErrors: [],
+  clipMapping: null,
 };
 
 describe('App', () => {
@@ -79,6 +81,52 @@ describe('App', () => {
 
     expect(screen.getByRole('alert').textContent).toBe('Falha de rede.');
     expect(screen.getByRole('status').textContent).toBe('Takes salvos.');
+  });
+
+  describe('clipes', () => {
+    const clipMapping = {
+      folder: 'D:\\clipes',
+      scannedAt: '2026-01-01T00:00:00Z',
+      takes: [{ takeNumber: 1, clips: [], warnings: [] }],
+      orphanClips: [],
+      ignoredFiles: [],
+      notices: [],
+    };
+    const saveNote = 'Salve os takes para atualizar os avisos dos clipes.';
+
+    it('depois de interpretar o roteiro aparece o campo da pasta', () => {
+      vi.mocked(useProjectEditor).mockReturnValue(makeEditor({ project }));
+      render(<App />);
+
+      expect(screen.getByLabelText('Pasta dos clipes')).toBeDefined();
+      expect(screen.queryByRole('group', { name: 'Clipes do take 1' })).toBeNull();
+    });
+
+    it('com mapeamento mostra o grupo do take', () => {
+      vi.mocked(useProjectEditor).mockReturnValue(
+        makeEditor({ project: { ...project, clipMapping } }),
+      );
+      render(<App />);
+
+      expect(screen.getByRole('group', { name: 'Clipes do take 1' })).toBeDefined();
+      expect(screen.queryByText(saveNote)).toBeNull();
+    });
+
+    it('com edição local pendente aparece a nota de salvar', () => {
+      vi.mocked(useProjectEditor).mockReturnValue(
+        makeEditor({ project: { ...project, clipMapping }, isDirty: true }),
+      );
+      render(<App />);
+
+      expect(screen.getByText(saveNote)).toBeDefined();
+    });
+
+    it('sem mapeamento a nota de salvar não aparece', () => {
+      vi.mocked(useProjectEditor).mockReturnValue(makeEditor({ project, isDirty: true }));
+      render(<App />);
+
+      expect(screen.queryByText(saveNote)).toBeNull();
+    });
   });
 
   describe('erros de regra por take', () => {

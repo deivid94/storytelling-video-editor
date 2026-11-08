@@ -1,7 +1,11 @@
 import { Router } from 'express';
 import { createProjectController } from '../controllers/project.controller.js';
 import { validateBody } from '../middlewares/validate-body.js';
-import { createProjectBodySchema, updateTakesBodySchema } from '../schemas/project.schemas.js';
+import {
+  createProjectBodySchema,
+  scanClipsBodySchema,
+  updateTakesBodySchema,
+} from '../schemas/project.schemas.js';
 import type { ProjectService } from '../services/project.service.js';
 
 export function createProjectRoutes(projectService: ProjectService) {
@@ -11,6 +15,7 @@ export function createProjectRoutes(projectService: ProjectService) {
   router.post('/', validateBody(createProjectBodySchema), controller.create);
   router.get('/:id', controller.get);
   router.put('/:id/takes', validateBody(updateTakesBodySchema), controller.updateTakes);
+  router.put('/:id/clips-folder', validateBody(scanClipsBodySchema), controller.scanClips);
 
   return router;
 }

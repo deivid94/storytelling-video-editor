@@ -40,7 +40,9 @@ export function createFileProjectRepository(dataDir: string): ProjectRepository 
       throw error;
     }
     try {
-      return JSON.parse(content) as Project;
+      // Projetos da fatia 1 não têm clipScan.
+      const parsed = JSON.parse(content) as Project;
+      return { ...parsed, clipScan: parsed.clipScan ?? null };
     } catch {
       throw new AppError(500, 'O arquivo do projeto está corrompido.');
     }
