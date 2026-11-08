@@ -75,18 +75,28 @@ function isQuarterTurn(stream: ProbeStream): boolean {
   return Math.abs(rotation) % 180 === 90;
 }
 
-function toVideoInfo(output: ProbeOutput): VideoInfo {
+function readDuration(output: ProbeOutput): number {
   const duration = Number(output.format?.duration);
   if (!Number.isFinite(duration) || duration <= 0) {
     throw new VideoProbeError(UNREADABLE_VIDEO_MESSAGE);
   }
+  return duration;
+}
+
+function findVideoStream(output: ProbeOutput): ProbeStream & { width: number; height: number } {
   const stream = output.streams?.find((item) => item.codec_type === 'video');
-  if (!stream || !stream.width || !stream.height) {
+  if (!stream?.width || !stream.height) {
     throw new VideoProbeError(NO_VIDEO_STREAM_MESSAGE);
   }
+  return { ...stream, width: stream.width, height: stream.height };
+}
+
+function toVideoInfo(output: ProbeOutput): VideoInfo {
+  const durationSeconds = readDuration(output);
+  const stream = findVideoStream(output);
   const swap = isQuarterTurn(stream);
   return {
-    durationSeconds: duration,
+    durationSeconds,
     width: swap ? stream.height : stream.width,
     height: swap ? stream.width : stream.height,
     fps: parseFrameRate(stream.r_frame_rate),
