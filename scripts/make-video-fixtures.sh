@@ -9,7 +9,7 @@ TMP=$(mktemp -d)
 trap 'rm -rf "$TMP"' EXIT
 mkdir -p "$OUT"
 
-# Sem metadados de encoder/data/aparelho nos arquivos gerados.
+# Sem GPS, data nem aparelho nos arquivos gerados; só a versão da biblioteca do ffmpeg (encoder=Lavf) permanece.
 COMMON=(-v error -y -fflags +bitexact)
 
 # 320x180 com rotação -90 (lido como 180x320), 1,5s, 60fps, H.265, lente 52mm
